@@ -18,9 +18,9 @@ const UserSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Room'
     },
-    interest: [{
+    interest: {
         type: String,
-    }],
+    },
     publickey: {
         type: String,
     }
