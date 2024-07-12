@@ -21,9 +21,7 @@ const UserSchema = new mongoose.Schema({
     interest: {
         type: String,
     },
-    publickey: {
-        type: String,
-    }
+    publicKey: { type: String, required: true },
 });
 const User = mongoose.model('User', UserSchema);
 export default User;

@@ -1,16 +1,17 @@
-import express from 'express';
+import mongoose from 'mongoose';
+
 const PersonalMessageSchema = new mongoose.Schema({
     senderId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
-    receiverId: {
+    recipientId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
-    content: {
+    encryptedMessage: {
         type: String,
         required: true
     },
@@ -19,5 +20,6 @@ const PersonalMessageSchema = new mongoose.Schema({
         default: Date.now
     }
 });
+
 const PersonalMessage = mongoose.model('PersonalMessage', PersonalMessageSchema);
 export default PersonalMessage;
