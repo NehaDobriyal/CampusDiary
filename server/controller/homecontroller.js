@@ -1,6 +1,6 @@
-import { getUserId } from "../middleware/auth";
-import User from "../model/user";
-import Room from "../model/room";
+import { getUserId } from "../middleware/auth.js";
+import User from "../model/user.js";
+import Room from "../model/room.js";
 export const getallusers = async (req, res) => {
     try {
         const id = getUserId(req);

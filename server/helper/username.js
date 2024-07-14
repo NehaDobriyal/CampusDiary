@@ -1,4 +1,4 @@
-import Room from "../model/room";
+import Room from "../model/room.js";
 export async function  generateUsername(unversityname,n){
     //const room = Room.find({collegename: unversityname});
     //if(!room){
@@ -18,6 +18,7 @@ export async function  generateUsername(unversityname,n){
     }
     if(itr!==" ") username += itr[0];
     username += "cd" + n;
+    console.log(username);
     return username;
 }
 //console.log(generateUsername("Graphic Era University",9));

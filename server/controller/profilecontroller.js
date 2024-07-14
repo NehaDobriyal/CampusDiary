@@ -1,5 +1,5 @@
 import User from "../model/user.js";
-import { getUserId } from "../middleware/auth";
+import { getUserId } from "../middleware/auth.js";
 export const getProfile = async (req, res) => {
   try {
     const id  = getUserId(req);

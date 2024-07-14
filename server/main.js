@@ -8,18 +8,23 @@ import bodyParser from "body-parser";
 import { Server } from "socket.io";
 import authroutes from "./routes/authroutes.js";
 import communityroutes from "./routes/communityroutes.js";
-import homeroutes from "./routes/homeroutes.js"; 
-import personalchat from "./routes/personalchat.js";
-import profileroutes from "./routes/profileroutes.js"; 
+import http from 'http';
+import cors from 'cors';
+//import homeroutes from "./routes/homeroute.js"; 
+//import personalchat from "./routes/personalchat.js";
+//import profileroutes from "./routes/profile.js"; 
 
 dotenv.config();
 const app = express();
-const server = require('http').createServer(app); 
+const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: "*", 
   },
 });
+app.use(cors({
+  origin: 'http://localhost:5173'
+}));
 
 // Connect to MongoDB
 connection();
@@ -27,14 +32,15 @@ connection();
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Routes
 app.use("/api/auth", authroutes);
 app.use("/api/community", communityroutes);
-app.use("/api/home", homeroutes);
-app.use("/api/personalchat", personalchat);
-app.use("/api/profile", profileroutes);
+//app.use("/api/home", homeroutes);
+//app.use("/api/personalchat", personalchat);
+//app.use("/api/profile", profileroutes);
 
 io.on('connection', (socket) => {
   console.log('A user connected');

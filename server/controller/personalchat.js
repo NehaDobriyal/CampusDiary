@@ -1,8 +1,8 @@
-import { getUserId } from "../middleware/auth";
-import User from "../model/user";
-import PersonalMessage from "../model/personal";
-import {io} from '../server'
-import {encryptMessage,encryptedSymmetricKey,decryptMessage,decryptSymmetricKey} from "../helper/encryption";
+import { getUserId } from "../middleware/auth.js";
+import User from "../model/user.js";
+import PersonalMessage from "../model/personal.js";
+import {io} from '../main.js';
+//import {encryptMessage,encryptedSymmetricKey,decryptMessage,decryptSymmetricKey} from "../helper/encryption.js";
 export const sendPersonalMessage = async (req, res) => {
     const { recipientId, content } = req.body;
     const senderId = getUserId(req);

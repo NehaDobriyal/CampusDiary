@@ -16,12 +16,13 @@ const UserSchema = new mongoose.Schema({
     },
     roomid: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Room'
+        ref: 'Room',
+        default : null
     },
     interest: {
         type: String,
     },
-    publicKey: { type: String, required: true },
+    //publicKey: { type: String, required: true },
 });
 const User = mongoose.model('User', UserSchema);
 export default User;
