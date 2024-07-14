@@ -17,6 +17,7 @@ import NotFoundError from "./pages/error/not-found"
 // User Pages
 import UserLayout from "./pages/User/UserLayout"
 import UserHome from "./pages/User/UserHome"
+import UserCommunity from "./pages/User/UserCommunity"
 
 
 
@@ -33,10 +34,10 @@ function App() {
             
             {/* Landing Page */} 
             <Route path="/" element={<UserLayout />} >
-              <Route path="" element={<Navigate to="/page1" />} />
-              <Route path="page1" element={<UserHome />} />
-              <Route path="page2" element={<UserHome />} />
-              <Route path="page3" element={<UserHome />} />
+              <Route path="" element={<Navigate to="/community" />} />
+              <Route path="community" element={<UserCommunity />} />
+              <Route path="personalChat" element={<UserHome />} />
+              <Route path="tos" element={<UserHome />} />
               <Route path="page4" element={<UserHome />} />
               <Route path="page5" element={<UserHome />} />
             </Route>
