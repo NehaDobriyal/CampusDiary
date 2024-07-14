@@ -5,7 +5,7 @@ import Message from "../model/groupchat.js";
 import { getUserId } from "../middleware/auth";
 import User from "../model/user";
 import Message from "../model/groupchat.js";
-import { io } from '../server'; // Import the io instance
+import { io } from '../server'; 
 
 export const sendMessage = async (req, res) => {
     const { content, chatid } = req.body;
