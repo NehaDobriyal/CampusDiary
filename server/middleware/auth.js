@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../model/user.js';
 
-// Function to parse cookies into an object
 const parseCookie = (cookieString) => {
   if (!cookieString || cookieString.length < 1) return {};
   return cookieString
@@ -13,7 +12,6 @@ const parseCookie = (cookieString) => {
     }, {});
 };
 
-// Middleware to protect routes that require login
 export const requiresLogin = async (req, res, next) => {
   try {
     const { cookie } = req.headers;
@@ -24,7 +22,8 @@ export const requiresLogin = async (req, res, next) => {
       });
     }
 
-    const { authToken } = parseCookie(cookie);
+    const cookies = parseCookie(cookie);
+    const authToken = cookies.token; 
 
     if (!authToken) {
       return res.status(401).send({
@@ -34,7 +33,16 @@ export const requiresLogin = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
-    req.user = decoded;
+    const user = await User.findById(decoded.userId);
+
+    if (!user) {
+      return res.status(401).send({
+        success: false,
+        message: 'Unauthorized Access: User not found',
+      });
+    }
+
+    req.user = user;
     next();
   } catch (error) {
     console.error(error);
@@ -45,17 +53,18 @@ export const requiresLogin = async (req, res, next) => {
   }
 };
 
-// Function to get user ID from the JWT token in cookies
 export const getUserId = (req) => {
   try {
     const { cookie } = req.headers;
     if (!cookie) return null;
 
-    const { authToken } = parseCookie(cookie);
+    const cookies = parseCookie(cookie);
+    const authToken = cookies.token; 
 
     if (!authToken) return null;
 
     const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
+    console.log("Decoded Token:", decoded); 
     return decoded.userId;
   } catch (error) {
     console.error('Error getting user ID:', error);

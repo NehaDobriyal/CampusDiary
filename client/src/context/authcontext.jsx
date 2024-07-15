@@ -1,7 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-
 const AuthContext = React.createContext();
-
 export function useAuth() {
   return useContext(AuthContext);
 }
@@ -21,6 +19,7 @@ export function AuthProvider({ children }) {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({ email, password }),
+        credentials: 'include', 
       });
 
       const data = await response.json();
@@ -33,7 +32,6 @@ export function AuthProvider({ children }) {
         localStorage.setItem('isLoggedIn', true);
         localStorage.setItem('userData', JSON.stringify({ userId: data.userId, roomId: data.roomId }));
         localStorage.setItem('userToken', data.token);
-        //navigate("/");
         console.log("yes");
       }
     } catch (err) {
@@ -52,11 +50,10 @@ export function AuthProvider({ children }) {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({ email, password, university }),
+        credentials: 'include', 
       });
-      
 
       const data = await response.json();
-      console.log(data);
       if (!data.success) {
         alert(data.message || data.error);
       } else {
@@ -66,7 +63,6 @@ export function AuthProvider({ children }) {
         localStorage.setItem('isLoggedIn', true);
         localStorage.setItem('userData', JSON.stringify({ userId: data.userId, roomId: data.roomId }));
         localStorage.setItem('userToken', data.token);
-        //navigate("/");
       }
     } catch (error) {
       console.error('Signup error:', error);

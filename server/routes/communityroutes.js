@@ -5,7 +5,7 @@ const router = express.Router();
 
 //router.post('/adduniversity',createGroup);
 router.use(requiresLogin);
-router.post('/sendMessage', sendMessage);
+router.post('/sendMessage/:roomid', sendMessage);
 router.get('/getMessages/:roomid', getMessages);
 
 export default router;

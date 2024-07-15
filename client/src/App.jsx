@@ -24,12 +24,11 @@ import { useAuth } from "../src/context/authcontext.jsx";
 function App() {
   //const { isLoggedIn } = useAuth();
   //console.log(isLoggedIn); // Useful for debugging
-  const isLoggedIn = false;
+  const {isLoggedIn} = useAuth();
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <BrowserRouter>
         <Routes>
-          {}
           {isLoggedIn ? (
             <Route path="/" element={<UserLayout />}>
               <Route index element={<Navigate to="/community" />} />
@@ -40,7 +39,6 @@ function App() {
               <Route path="page5" element={<UserHome />} />
             </Route>
           ) : (
-            // Public Routes
             <Route path="/" element={<Navigate to="/signup" />} />
           )}
 

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
-import axios from 'axios';
 import {
     CornerDownLeft,
 } from "lucide-react";
@@ -8,24 +7,31 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from '@/context/authcontext.jsx';
 
 const socket = io('http://localhost:4500'); 
 
 const UserCommunity = () => {
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
-    const roomId = 'your-room-id'; 
+    const { userData } = useAuth();
+    const roomId = userData.roomId;
+    console.log(roomId);
+
     useEffect(() => {
         const fetchMessages = async () => {
             try {
-                const response = await axios.get(`/api/community/getMessages/${roomId}`);
-                setMessages(response.data);
+                const response = await fetch(`http://localhost:4500/api/community/getMessages/${roomId}`);
+                const data = await response.json();
+                setMessages(data);
+                console.log(data);
             } catch (error) {
                 console.error('Error fetching messages:', error);
             }
         };
 
         fetchMessages();
+
         socket.on('message', (newMessage) => {
             setMessages((prevMessages) => [...prevMessages, newMessage]);
         });
@@ -42,9 +48,16 @@ const UserCommunity = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('/api/community/sendMessage', { content: message,roomid: roomId });
-            console.log('Message submitted:', response.data);
-            setMessage(''); 
+            const response = await fetch(`http://localhost:4500/api/community/sendMessage/${roomId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ content: message, roomid: roomId }),
+            });
+            const data = await response.json();
+            console.log('Message submitted:', data);
+            setMessage('');
         } catch (error) {
             console.error('Error submitting message:', error);
         }
@@ -56,11 +69,11 @@ const UserCommunity = () => {
                 Public Chat
             </Badge>
             <div className="flex-1 overflow-y-auto">
-                {/*messages && messages.map((msg, index) => (
+                {messages && messages.map((msg, index) => (
                     <div key={index} className="p-2">
                         <strong>{msg.senderId}</strong>: {msg.content}
                     </div>
-                ))*/}
+                ))}
             </div>
             <form
                 onSubmit={handleSubmit}

@@ -23,7 +23,8 @@ const io = new Server(server, {
   },
 });
 app.use(cors({
-  origin: 'http://localhost:5173'
+  origin: 'http://localhost:5173',
+  credentials: true,
 }));
 
 // Connect to MongoDB

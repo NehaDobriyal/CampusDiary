@@ -13,7 +13,6 @@ const generateJWTToken = (user) => {
     { expiresIn: '59d' }
   );
 };
-
 export const registerController = async (req, res) => {
   try {
     let { email, password, university } = req.body;
@@ -29,8 +28,6 @@ export const registerController = async (req, res) => {
       return res.status(400).json({ message: "Email already exists." });
     }
     let existingRoom = await Room.findOne({ collegename: university });
-    console.log(existingRoom);
-    console.log(university);
     if (!existingRoom) {
       await createGroup(university);
       existingRoom = await Room.findOne({ collegename: university });
@@ -44,10 +41,11 @@ export const registerController = async (req, res) => {
     existingRoom.users.push(user._id);
     await existingRoom.save();
     const token = generateJWTToken(user);
-    res.cookie('token', token, {
+    res.cookie('authToken', token, {
       maxAge: 59 * 24 * 60 * 60 * 1000, // 59 days in milliseconds
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production'
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'None' 
     });
 
     res.status(201).json({
@@ -71,22 +69,23 @@ export const loginController = async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ message: "All fields are required." });
     }
-    console.log(email);
+
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials." });
     }
-    console.log(user.password);
+
     const isMatch = await verifyValue(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials." });
     }
 
     const token = generateJWTToken(user);
-    res.cookie('token', token, {
+    res.cookie('authToken', token, {
       maxAge: 59 * 24 * 60 * 60 * 1000, 
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production'
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'None' 
     });
 
     res.status(200).json({
@@ -105,7 +104,11 @@ export const loginController = async (req, res) => {
 // User Logout Controller
 export const logoutController = (req, res) => {
   try {
-    res.clearCookie('token', { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+    res.clearCookie('authToken', { 
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Strict' 
+    });
     res.status(200).send({ success: true, message: 'Logout successful' });
   } catch (error) {
     console.error('Error logging out:', error);
