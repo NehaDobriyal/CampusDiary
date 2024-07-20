@@ -20,6 +20,8 @@ import UserCommunity from "./pages/User/UserCommunity";
 // Context
 import { useAuth } from "./context/authcontext";
 import PrivateRoutes from "./PrivateRoutes";
+import V0PersonalChat from "./components/V0/V0PersonalChat";
+import V0Tos from "./components/V0/V0Tos";
 
 function App() {
   const { isLoggedIn } = useAuth();
@@ -36,8 +38,8 @@ function App() {
                 <Route path="/community" element={<UserLayout />}>
                   <Route index element={<Navigate to="/community/chat" />} />
                   <Route path="chat" element={<UserCommunity />} />
-                  <Route path="personalChat" element={<UserHome />} />
-                  <Route path="tos" element={<UserHome />} />
+                  <Route path="personalChat" element={<V0PersonalChat/>} />
+                  <Route path="tos" element={<V0Tos />} />
                   <Route path="page4" element={<UserHome />} />
                   <Route path="page5" element={<UserHome />} />
                 </Route>
