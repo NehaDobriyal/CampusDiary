@@ -4,8 +4,6 @@ import { generateUsername } from "../helper/username.js";
 import Room from "../model/room.js";
 import jwt from 'jsonwebtoken';
 import { createGroup } from "./communitycontroller.js";
-
-// Generate JWT Token
 const generateJWTToken = (user) => {
   return jwt.sign(
     { userId: user._id, email: user.email },
@@ -35,25 +33,24 @@ export const registerController = async (req, res) => {
     const roomid = existingRoom._id;
     const username = await generateUsername(university, existingRoom.userno + 1);
     const user = new User({ email, username, password, university, roomid });
-
     await user.save();
     existingRoom.userno++;
     existingRoom.users.push(user._id);
     await existingRoom.save();
-    const token = generateJWTToken(user);
-    res.cookie('authToken', token, {
-      maxAge: 59 * 24 * 60 * 60 * 1000, // 59 days in milliseconds
+    const authToken = generateJWTToken(user);
+    res.cookie('authToken', authToken, {
+      maxAge: 59 * 24 * 60 * 60 * 1000, 
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: true,
       sameSite: 'None' 
-    });
+    })
 
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
       userId: user._id,
       roomId: user.roomid,
-      token,
+      authToken,
     });
   } catch (e) {
     console.error(e);
@@ -64,7 +61,7 @@ export const registerController = async (req, res) => {
 // User Login Controller
 export const loginController = async (req, res) => {
   try {
-    let { email, password } = req.body;
+    const { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: "All fields are required." });
@@ -80,11 +77,11 @@ export const loginController = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials." });
     }
 
-    const token = generateJWTToken(user);
-    res.cookie('authToken', token, {
+    const authToken = generateJWTToken(user);
+    res.cookie('authToken',authToken, {
       maxAge: 59 * 24 * 60 * 60 * 1000, 
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: true,
       sameSite: 'None' 
     });
 
@@ -93,7 +90,7 @@ export const loginController = async (req, res) => {
       message: 'Login successful',
       userId: user._id,
       roomId: user.roomid,
-      token,
+      authToken,
     });
   } catch (error) {
     console.error(error);

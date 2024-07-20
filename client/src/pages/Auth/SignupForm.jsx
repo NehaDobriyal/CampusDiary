@@ -11,18 +11,19 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
-import { useAuth } from "../../context/authcontext.jsx"; 
+import { useAuth } from "../../context/authcontext.jsx";
+import { useNavigate } from 'react-router-dom';
 
 const universityOptions = [
   { value: 'Graphic Era University', label: 'Graphic Era University' },
 ];
 
 export function SignupForm() {
-  const { signup } = useAuth(); 
-  //console.log(useAuth());
+  const { signup } = useAuth();
   const [selectedUniversity, setSelectedUniversity] = useState(null);
-  const [email, setEmail] = useState(''); 
-  const [password, setPassword] = useState(''); 
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -30,10 +31,13 @@ export function SignupForm() {
       alert("All fields are required");
       return;
     }
-    //console.log(email);
-    //console.log(password);
-    //console.log(selectedUniversity.value);
-    signup(email, password, selectedUniversity.value); 
+    try {
+      await signup(email, password, selectedUniversity.value);
+      navigate("/community");
+    } catch (error) {
+      alert("Error signing up. Please try again.");
+      console.error("Signup error:", error);
+    }
   };
 
   return (
@@ -52,7 +56,7 @@ export function SignupForm() {
               id="email"
               type="email"
               placeholder="m@xyz.com"
-              value={email} 
+              value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
@@ -62,8 +66,8 @@ export function SignupForm() {
             <Input
               id="password"
               type="password"
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>

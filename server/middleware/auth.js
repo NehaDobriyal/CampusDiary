@@ -11,41 +11,32 @@ const parseCookie = (cookieString) => {
       return acc;
     }, {});
 };
-
 export const requiresLogin = async (req, res, next) => {
   try {
-    const { cookie } = req.headers;
-    if (!cookie) {
+    console.log(req.headers);
+    if(!req.headers.cookie) {
       return res.status(401).send({
         success: false,
         message: 'Unauthorized Access: Token not provided',
       });
     }
 
-    const cookies = parseCookie(cookie);
-    const authToken = cookies.token; 
-
-    if (!authToken) {
+    const token = parseCookie(req.headers.cookie).authToken
+    //console.log(token);
+    if (!token) {
       return res.status(401).send({
         success: false,
         message: 'Unauthorized Access: Token not provided',
       });
     }
 
-    const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.userId);
-
-    if (!user) {
-      return res.status(401).send({
-        success: false,
-        message: 'Unauthorized Access: User not found',
-      });
-    }
-
-    req.user = user;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    //console.log("verified");
+    req.user = decoded;
+    //console.log(req.user);
     next();
   } catch (error) {
-    console.error(error);
+    console.log(error);
     res.status(401).send({
       success: false,
       message: 'Unauthorized Access: Invalid Token',
@@ -54,20 +45,8 @@ export const requiresLogin = async (req, res, next) => {
 };
 
 export const getUserId = (req) => {
-  try {
-    const { cookie } = req.headers;
-    if (!cookie) return null;
-
-    const cookies = parseCookie(cookie);
-    const authToken = cookies.token; 
-
-    if (!authToken) return null;
-
-    const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
-    console.log("Decoded Token:", decoded); 
-    return decoded.userId;
-  } catch (error) {
-    console.error('Error getting user ID:', error);
-    return null;
-  }
+  const cookies = parseCookie(req.headers.cookie)
+  const decoded = jwt.verify(cookies.authToken, process.env.JWT_SECRET);
+  //console.log(decoded.userId);
+  return decoded.userId;
 };

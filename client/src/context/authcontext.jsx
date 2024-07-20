@@ -3,7 +3,6 @@ const AuthContext = React.createContext();
 export function useAuth() {
   return useContext(AuthContext);
 }
-
 export function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -19,7 +18,7 @@ export function AuthProvider({ children }) {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({ email, password }),
-        credentials: 'include', 
+        credentials: 'include',  
       });
 
       const data = await response.json();
@@ -28,11 +27,11 @@ export function AuthProvider({ children }) {
       } else {
         setIsLoggedIn(true);
         setUserData({ userId: data.userId, roomId: data.roomId });
-        setUserToken(data.token);
+        setUserToken(data.authToken);
         localStorage.setItem('isLoggedIn', true);
         localStorage.setItem('userData', JSON.stringify({ userId: data.userId, roomId: data.roomId }));
-        localStorage.setItem('userToken', data.token);
-        console.log("yes");
+        localStorage.setItem('userToken', data.authToken);
+        //console.log("yes");
       }
     } catch (err) {
       console.log('Signin error:', err);
@@ -50,7 +49,7 @@ export function AuthProvider({ children }) {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({ email, password, university }),
-        credentials: 'include', 
+        credentials: 'include',
       });
 
       const data = await response.json();
@@ -59,10 +58,10 @@ export function AuthProvider({ children }) {
       } else {
         setIsLoggedIn(true);
         setUserData({ userId: data.userId, roomId: data.roomId });
-        setUserToken(data.token);
+        setUserToken(data.authToken);
         localStorage.setItem('isLoggedIn', true);
         localStorage.setItem('userData', JSON.stringify({ userId: data.userId, roomId: data.roomId }));
-        localStorage.setItem('userToken', data.token);
+        localStorage.setItem('userToken', data.authToken);
       }
     } catch (error) {
       console.error('Signup error:', error);
@@ -90,10 +89,10 @@ export function AuthProvider({ children }) {
     }
     const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
     const data = JSON.parse(userData);
-    const token = localStorage.getItem('userToken');
+    const authToken = localStorage.getItem('userToken');
     setIsLoggedIn(loggedIn);
     setUserData(data);
-    setUserToken(token);
+    setUserToken(authToken);
     setIsLoading(false);
   };
 

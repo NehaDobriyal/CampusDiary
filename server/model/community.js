@@ -15,7 +15,7 @@ const PostSchema = new mongoose.Schema({
             required: true
         }
     },
-    roomId: {
+    roomid: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Room',
         required: true

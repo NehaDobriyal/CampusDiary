@@ -9,23 +9,28 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/authcontext.jsx";
 
 export function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const {signin}  = useAuth();
-
+  const { signin } = useAuth();
+  const navigate = useNavigate();
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!email || !password) {
       alert("All fields are required");
       return;
     }
-    await signin(email, password);
+    try {
+      await signin(email, password);
+      navigate("/community");
+    } catch (error) {
+      alert("Error signing in. Please try again.");
+      console.error("Signin error:", error);
+    }
   };
-
   return (
     <Card className="mx-auto my-24 max-w-sm">
       <CardHeader>
@@ -62,7 +67,7 @@ export function LoginForm() {
               required
             />
           </div>
-          <Button onClick={handleSubmit} type="submit" className="w-full">
+          <Button type="submit" className="w-full">
             Login
           </Button>
         </form>

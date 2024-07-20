@@ -1,11 +1,10 @@
 import { getUserId } from "../middleware/auth.js";
 import User from "../model/user.js";
-import Message from "../model/groupchat.js";
+import Message from "../model/community.js";
 import { io } from '../main.js';
 import Group from "../model/room.js";
 
-export const createGroup = async (req, res) => {
-  const { university } = req.body;
+export const createGroup = async (university,req, res) => {
   if (!university) {
     return res.status(400).json({ message: "University field is required." });
   }
@@ -22,9 +21,7 @@ export const createGroup = async (req, res) => {
 export const sendMessage = async (req, res) => {
   const { content } = req.body;
   const { roomid } = req.params;
-  const id = req.user._id; // Get user ID from middleware
-  console.log(id);
-
+  const id = getUserId(req); 
   if (!id || !content) {
     return res.status(401).json({ message: "Unauthorized" });
   }
@@ -33,10 +30,9 @@ export const sendMessage = async (req, res) => {
   if (!user) {
     return res.status(404).json({ message: "User not found" });
   }
-
   const newMessage = {
-    senderId: id,
     content: content,
+    author :{userId:id, username:user.username},
     roomid: roomid,
   };
 
@@ -52,17 +48,14 @@ export const sendMessage = async (req, res) => {
 
 export const getMessages = async (req, res) => {
   const { roomid } = req.params;
-  const id = req.user._id; // Get user ID from middleware
-
+  const id = getUserId(req);
   if (!id || !roomid) {
     return res.status(401).json({ message: "Unauthorized" });
   }
-
   const user = await User.findById(id);
   if (!user) {
     return res.status(404).json({ message: "User not found" });
   }
-
   try {
     const messages = await Message.find({ roomid: roomid }).sort({ timestamp: 1 });
     res.status(200).json(messages);
