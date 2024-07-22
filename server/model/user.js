@@ -22,6 +22,13 @@ const UserSchema = new mongoose.Schema({
     interest: {
         type: String,
     },
+    profile:{
+        type:String,
+    },
+    isonline:{
+        type: Boolean,
+        default: false
+    }
     //publicKey: { type: String, required: true },
 });
 const User = mongoose.model('User', UserSchema);

@@ -26,10 +26,10 @@ export function AuthProvider({ children }) {
         alert(data.message || data.error);
       } else {
         setIsLoggedIn(true);
-        setUserData({ userId: data.userId, roomId: data.roomId });
+        setUserData({ userId: data.userId, roomId: data.roomId ,username: data.username});
         setUserToken(data.authToken);
         localStorage.setItem('isLoggedIn', true);
-        localStorage.setItem('userData', JSON.stringify({ userId: data.userId, roomId: data.roomId }));
+        localStorage.setItem('userData', JSON.stringify({ userId: data.userId, roomId: data.roomId ,username: data.username}));
         localStorage.setItem('userToken', data.authToken);
         //console.log("yes");
       }
@@ -57,10 +57,10 @@ export function AuthProvider({ children }) {
         alert(data.message || data.error);
       } else {
         setIsLoggedIn(true);
-        setUserData({ userId: data.userId, roomId: data.roomId });
+        setUserData({ userId: data.userId, roomId: data.roomId , username: data.username});
         setUserToken(data.authToken);
         localStorage.setItem('isLoggedIn', true);
-        localStorage.setItem('userData', JSON.stringify({ userId: data.userId, roomId: data.roomId }));
+        localStorage.setItem('userData', JSON.stringify({ userId: data.userId, roomId: data.roomId , username: data.username}));
         localStorage.setItem('userToken', data.authToken);
       }
     } catch (error) {

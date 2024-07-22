@@ -5,12 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from '@/context/authcontext.jsx';
-const socket = io('http://localhost:4500'); 
+
+const socket = io('http://localhost:4500');
+
 const UserCommunity = () => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const { userData } = useAuth();
   const roomId = userData.roomId;
+
   useEffect(() => {
     const fetchMessages = async () => {
       try {
@@ -27,22 +30,18 @@ const UserCommunity = () => {
         console.error('Error fetching messages:', error);
       }
     };
-
     fetchMessages();
-
+    socket.emit('joinRoom', roomId);
     socket.on('message', (newMessage) => {
       setMessages((prevMessages) => [...prevMessages, newMessage]);
     });
-
     return () => {
       socket.off('message');
     };
   }, [roomId]);
-
   const handleMessageChange = (e) => {
     setMessage(e.target.value);
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -54,8 +53,14 @@ const UserCommunity = () => {
         body: JSON.stringify({ content: message, roomid: roomId }),
         credentials: 'include',
       });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
       const data = await response.json();
       console.log('Message submitted:', data);
+      socket.emit('message', { ...data, roomid: roomId });
       setMessage('');
     } catch (error) {
       console.error('Error submitting message:', error);

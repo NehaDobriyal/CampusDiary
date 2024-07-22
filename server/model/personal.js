@@ -18,6 +18,10 @@ const PersonalMessageSchema = new mongoose.Schema({
     timestamp: {
         type: Date,
         default: Date.now
+    },
+    isread:{
+        type: Boolean,
+        default: false
     }
 });
 

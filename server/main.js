@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import mongoose from 'mongoose';
-import connection from "./helper/connect.js"; 
+import connection from "./helper/connect.js";
 import express from 'express';
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
@@ -10,23 +10,22 @@ import authroutes from "./routes/authroutes.js";
 import communityroutes from "./routes/communityroutes.js";
 import http from 'http';
 import cors from 'cors';
-
+import personalchat from "./routes/personalchat.js";
 dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:5173', // Update this to your frontend URL
+    origin: 'http://localhost:5173',
     methods: ["GET", "POST"],
     credentials: true,
   },
 });
 
-// Configure CORS for Express
 app.use(cors({
-  origin: 'http://localhost:5173', // Update this to your frontend URL
-  credentials: true, // Allow credentials (cookies)
+  origin: 'http://localhost:5173',
+  credentials: true,
 }));
 
 // Connect to MongoDB
@@ -41,7 +40,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Routes
 app.use("/api/auth", authroutes);
 app.use("/api/community", communityroutes);
-
+app.use("/api/personalchat", personalchat);
 io.on('connection', (socket) => {
   console.log('A user connected');
 
@@ -49,7 +48,6 @@ io.on('connection', (socket) => {
     socket.join(roomid);
     console.log(`User joined room: ${roomid}`);
   });
-
   socket.on('disconnect', () => {
     console.log('User disconnected');
   });

@@ -50,6 +50,7 @@ export const registerController = async (req, res) => {
       message: 'User registered successfully',
       userId: user._id,
       roomId: user.roomid,
+      username : user.username,
       authToken,
     });
   } catch (e) {
@@ -90,6 +91,7 @@ export const loginController = async (req, res) => {
       message: 'Login successful',
       userId: user._id,
       roomId: user.roomid,
+      username : user.username,
       authToken,
     });
   } catch (error) {
