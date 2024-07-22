@@ -26,7 +26,7 @@ export default function V0PersonalChat() {
           credentials: 'include',
         });
         const data = await response.json();
-        console.log(data[0]);
+        //console.log(data[0]);
         setNewMessage(data);
       } catch (error) {
         console.error('Error fetching messages:', error);
@@ -37,7 +37,7 @@ export default function V0PersonalChat() {
   }, []); 
 
   const handleclick = async (message) => {
-    const recipientId = message.recipientId;
+    const recipientId = message.seconduser;
     const username = message.username;
     setRecipientId(recipientId);
     setUsername(username);

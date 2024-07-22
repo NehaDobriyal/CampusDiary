@@ -13,7 +13,7 @@ const parseCookie = (cookieString) => {
 };
 export const requiresLogin = async (req, res, next) => {
   try {
-    console.log(req.headers);
+    //console.log(req.headers);
     if(!req.headers.cookie) {
       return res.status(401).send({
         success: false,

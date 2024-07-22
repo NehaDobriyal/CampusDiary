@@ -9,6 +9,8 @@ const ChatSession = ({recipientId,username}) => {
     const [currMess, setCurrMess] = useState('');
     const userData = useAuth();
     const userid = userData.userData.userId;
+    //console.log(userid);
+    //console.log(recipientId);
     useEffect(() => {
         const fetchMessages = async () => {
             try {
@@ -20,7 +22,7 @@ const ChatSession = ({recipientId,username}) => {
                     credentials: 'include',
                 });
                 const data = await response.json();
-                console.log(data);
+                //console.log(data);
                 setMessage(data);
             } catch (error) {
                 console.error('Error fetching messages:', error);
@@ -28,13 +30,15 @@ const ChatSession = ({recipientId,username}) => {
         };
 
         fetchMessages();
-    }, [userid, recipientId]); 
+    }, []); 
     const handleChange = (event) => {
         setCurrMess(event.target.value);
     };
 
     const handleSubmit = async () => {
         if (currMess.trim() === '') return; 
+        //console.log(userid);
+        //console.log(recipientId);
         try {
             await fetch('http://localhost:4500/api/personalchat/sendpersonal', {
                 method: 'POST',
@@ -83,8 +87,8 @@ const ChatSession = ({recipientId,username}) => {
             </div>
             <div className="flex-1 overflow-auto p-4 flex flex-col gap-4">
                 {message && message.map((msg, index) => (
-                    <div key={index} className={`flex items-end gap-2 ${msg.sendBy === userid ? 'justify-end' : ''}`}>
-                        <div className={`px-4 py-2 rounded-lg max-w-[75%] text-sm ${msg.senderBy === userid ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                    <div key={index} className={`flex items-end gap-2 ${msg.isSender? 'justify-end' : ''}`}>
+                        <div className={`px-4 py-2 rounded-lg max-w-[75%] text-sm ${msg.isSender ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
                             {msg.content}
                         </div>
                         <div className="text-xs text-muted-foreground">{new Date(msg.timestamp).toLocaleTimeString()}</div>

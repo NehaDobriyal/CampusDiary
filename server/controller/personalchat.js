@@ -3,6 +3,7 @@ import User from "../model/user.js";
 import PersonalMessage from "../model/personal.js";
 import {io} from '../main.js';
 import { timestamp } from "rxjs";
+import mongoose from "mongoose";
 //import ChatSession from "../model/ChatSession.js";
 //import {encryptMessage,encryptedSymmetricKey,decryptMessage,decryptSymmetricKey} from "../helper/encryption.js";
 export const sendPersonalMessage = async (req, res) => {
@@ -10,8 +11,9 @@ export const sendPersonalMessage = async (req, res) => {
     if (!senderId || !recipientId || !message) {
         return res.status(400).json({ message: "Bad Request: Missing required fields" });
     }
-
+    //console.log("recipientId", recipientId);
     const recipient = await User.findById(recipientId);
+    //console.log(recipient);
     if (!recipient) {
         return res.status(404).json({ message: "Recipient not found" });
     }
@@ -51,11 +53,12 @@ export const getPersonalMessages = async (req, res) => {
     if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
     }
+    //console.log(userId);
     try {
         const chatSessions = await PersonalMessage.find({
             $or: [
                 { senderId: userId },
-                { recipientId: userId }
+                { recipientId: userId}
             ]
         });
         if (!chatSessions.length) {
@@ -67,22 +70,26 @@ export const getPersonalMessages = async (req, res) => {
                 continue;
             }
             const sortedMessages = session.encryptedMessages.sort((a, b) => b.timestamp - a.timestamp);
-            const lastMessage = sortedMessages[0]; 
-
-            const id = lastMessage.sendBy === userId ? lastMessage.readBy : lastMessage.sendBy;
+            const lastMessage = sortedMessages[0];
+            //console.log(lastMessage);
+            //console.log("sending:"+lastMessage.sendBy);
+            //console.log("reading:"+lastMessage.readBy); 
+            //console.log(lastMessage.sendBy===userId);
+            const id = (lastMessage.sendBy.toString()) === userId ? lastMessage.readBy : lastMessage.sendBy;
             const user2 = await User.findById(id);
+            //console.log("user2:"+id);
             if (!user2) {
                 console.log("User not found");
                 continue;
             }
-
             messages.push({
                 senderId: lastMessage.sendBy,
                 recipientId: lastMessage.readBy,
                 message: lastMessage.content,
                 timestamp: lastMessage.timestamp,
                 username: user2.username,
-                isSender: (lastMessage.sendBy === userId)
+                isSender: ((lastMessage.sendBy.toString()) === userId),
+                seconduser :id,
             });
         }
 
@@ -98,6 +105,8 @@ export const getPersonalMessages = async (req, res) => {
 
 export const setupchat = async (req, res) => {
     const { user1, user2 } = req.params;
+    //console.log(user1);
+    //console.log(user2);
     if (!user1 || !user2) {
         return res.status(400).json({ message: "Bad Request: Missing user parameters" });
     }
@@ -109,7 +118,7 @@ export const setupchat = async (req, res) => {
                 { senderId: user2, recipientId: user1 }
             ]
         });
-
+        //console.log("chatSession: " + chatSession);
         if (!chatSession) {
             chatSession = new PersonalMessage({
                 senderId: user1,
@@ -119,18 +128,25 @@ export const setupchat = async (req, res) => {
             await chatSession.save();
         }
         let messages = [];
+        //console.log(chatSession);
         if(chatSession.encryptedMessages){
             for(const message of chatSession.encryptedMessages){
+                const id = (message.sendBy.toString()) === user1? message.readBy : message.sendBy;
+                const user = await User.findById(id);
+                //console.log(user.username);
+                //console.log("debugging messages..");
                 messages.push({
                     sendBy: message.sendBy,
                     readBy: message.readBy,
                     content: message.content,
                     timestamp: message.timestamp,
-                    username: message.username,
-                    isSender: (message.sendBy === user1)
+                    username: user.username,
+                    isSender: ((message.sendBy.toString()) === user1),
+                    seconduser :id,
                 })
             }
         }
+        //console.log("messages:"+ messages);
         res.status(200).json(messages);
     } catch (error) {
         console.error(error);
