@@ -4,16 +4,11 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/context/authcontext";
-import { useParams } from "react-router-dom";
-
-const ChatSession = () => {
-    const [username, setUsername] = useState('');
+const ChatSession = ({recipientId,username}) => {
     const [message, setMessage] = useState([]);
     const [currMess, setCurrMess] = useState('');
     const userData = useAuth();
     const userid = userData.userData.userId;
-    const { recipientId } = useParams();
-
     useEffect(() => {
         const fetchMessages = async () => {
             try {
@@ -25,6 +20,7 @@ const ChatSession = () => {
                     credentials: 'include',
                 });
                 const data = await response.json();
+                console.log(data);
                 setMessage(data);
             } catch (error) {
                 console.error('Error fetching messages:', error);
@@ -38,7 +34,7 @@ const ChatSession = () => {
     };
 
     const handleSubmit = async () => {
-        if (currMess.trim() === '') return; // Prevent sending empty messages
+        if (currMess.trim() === '') return; 
         try {
             await fetch('http://localhost:4500/api/personalchat/sendpersonal', {
                 method: 'POST',
@@ -53,7 +49,6 @@ const ChatSession = () => {
                 }),
             });
             setCurrMess(''); 
-            await fetchMessages();
         } catch (error) {
             console.error('Error sending message:', error);
         }
@@ -68,7 +63,7 @@ const ChatSession = () => {
                         <AvatarFallback>CD</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                        <div className="font-medium">Jane Doe</div>
+                        <div className="font-medium">{username}</div>
                         <div className="text-xs text-muted-foreground">Online</div>
                     </div>
                     <DropdownMenu>
@@ -87,10 +82,10 @@ const ChatSession = () => {
                 </div>
             </div>
             <div className="flex-1 overflow-auto p-4 flex flex-col gap-4">
-                {message.map((msg, index) => (
-                    <div key={index} className={`flex items-end gap-2 ${msg.senderId === userid ? 'justify-end' : ''}`}>
-                        <div className={`px-4 py-2 rounded-lg max-w-[75%] text-sm ${msg.senderId === userid ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                            {msg.encryptedMessage}
+                {message && message.map((msg, index) => (
+                    <div key={index} className={`flex items-end gap-2 ${msg.sendBy === userid ? 'justify-end' : ''}`}>
+                        <div className={`px-4 py-2 rounded-lg max-w-[75%] text-sm ${msg.senderBy === userid ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                            {msg.content}
                         </div>
                         <div className="text-xs text-muted-foreground">{new Date(msg.timestamp).toLocaleTimeString()}</div>
                     </div>

@@ -5,13 +5,16 @@ import { Input } from "@/components/ui/input";
 import ChatSession from "./ChatSession";
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/authcontext"; 
+import { useNavigate } from "react-router-dom";
 
 export default function V0PersonalChat() {
   const [newMessage, setNewMessage] = useState([]);
+  const [showChatSession, setShowChatSession] = useState(false);
+  const [recipientId, setRecipientId] = useState(null);
   const userData = useAuth();
-  //console.log(userData);
   const name = userData.userData.username;
-  //console.log(name);
+  const navigate = useNavigate();
+  const [username,setUsername] = useState('');
   useEffect(() => {
     const fetchMessages = async () => {
       try {
@@ -23,6 +26,7 @@ export default function V0PersonalChat() {
           credentials: 'include',
         });
         const data = await response.json();
+        console.log(data[0]);
         setNewMessage(data);
       } catch (error) {
         console.error('Error fetching messages:', error);
@@ -30,7 +34,15 @@ export default function V0PersonalChat() {
     };
 
     fetchMessages();
-  }, []); // Empty dependency array as no dependencies are used
+  }, []); 
+
+  const handleclick = async (message) => {
+    const recipientId = message.recipientId;
+    const username = message.username;
+    setRecipientId(recipientId);
+    setUsername(username);
+    setShowChatSession(true);
+  }
 
   return (
     <div className="flex h-screen w-full max-w-[1200px] mx-auto">
@@ -62,8 +74,8 @@ export default function V0PersonalChat() {
         </div>
         <div className="flex-1 overflow-auto">
           <div className="p-4 space-y-4">
-            {newMessage && newMessage.map((msg, index) => (
-              <div key={index} className="flex items-center gap-4">
+            {newMessage  && newMessage.map((msg, index) => (
+              <div key={index} className="flex items-center gap-4" onClick={() => handleclick(msg)}>
                 <Avatar>
                   <AvatarImage src="/placeholder-user.jpg" />
                   <AvatarFallback>JD</AvatarFallback>
@@ -80,7 +92,7 @@ export default function V0PersonalChat() {
           </div>
         </div>
       </div>
-      <ChatSession />
+      {showChatSession && <ChatSession recipientId={recipientId} username = {username}/>}
     </div>
   );
 }

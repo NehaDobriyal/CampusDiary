@@ -11,18 +11,28 @@ const PersonalMessageSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    encryptedMessage: {
-        type: String,
-        required: true
-    },
-    timestamp: {
-        type: Date,
-        default: Date.now
-    },
-    isread:{
-        type: Boolean,
-        default: false
-    }
+    encryptedMessages: [{
+        content: {
+            type: String,
+            required: true
+        },
+        timestamp: {
+            type: Date,
+            default: Date.now
+        },
+        isRead: {
+            type: Boolean,
+            default: false
+        },
+        sendBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        readBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        }
+    }]
 });
 
 const PersonalMessage = mongoose.model('PersonalMessage', PersonalMessageSchema);
