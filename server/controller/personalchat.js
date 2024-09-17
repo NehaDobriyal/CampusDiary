@@ -11,9 +11,9 @@ export const sendPersonalMessage = async (req, res) => {
     if (!senderId || !recipientId || !message) {
         return res.status(400).json({ message: "Bad Request: Missing required fields" });
     }
-    //console.log("recipientId", recipientId);
+    const sender = await User.find(ObjectId(senderId));
+    const reader = await User.find(ObjectId(recipientId));
     const recipient = await User.findById(recipientId);
-    //console.log(recipient);
     if (!recipient) {
         return res.status(404).json({ message: "Recipient not found" });
     }
@@ -34,14 +34,22 @@ export const sendPersonalMessage = async (req, res) => {
             });
         }
 
-        connection.encryptedMessages.push({
+        const newMessage = {
             sendBy: senderId,
             readBy: recipientId,
             content: message,
+            senderusername : sender.username,
+            readerusername : reader.username,
+            read: false,
             timestamp: new Date()
-        });
+        };
 
+        connection.encryptedMessages.push(newMessage);
         await connection.save();
+        io.to(senderId).emit('receiveMessage', newMessage);
+        io.to(recipientId).emit('receiveMessage', newMessage);
+        io.to(senderId).emit('updateSidebar', newMessage);
+        io.to(recipientId).emit('updateSidebar', newMessage);
         res.status(201).json({ message: "Message sent successfully" });
     } catch (error) {
         console.error(error);

@@ -48,6 +48,18 @@ io.on('connection', (socket) => {
     socket.join(roomid);
     console.log(`User joined room: ${roomid}`);
   });
+  socket.on('joinChat',(userid)=>{
+    socket.join(userid);
+    console.log(`User joined chat: ${userid}`);
+  });
+  socket.on('receiveMessage',(chatid)=>{
+    socket.join(chatid);
+    console.log(`User joined chat: ${chatid}`);
+  })
+  socket.on('updateSidebar', (userid) => {
+    socket.join(userid);
+    console.log(`User is updating sidebar: ${userid}`);
+  });
   socket.on('disconnect', () => {
     console.log('User disconnected');
   });

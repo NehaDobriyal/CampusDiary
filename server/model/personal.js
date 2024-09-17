@@ -31,6 +31,12 @@ const PersonalMessageSchema = new mongoose.Schema({
         readBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
+        },
+        senderusername:{
+            type: String,
+        },
+        readerusername:{
+            type: String,
         }
     }]
 });

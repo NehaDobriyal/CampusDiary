@@ -1,12 +1,12 @@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import ChatSession from "./ChatSession";
-import React, { useState, useEffect } from "react";
-import { useAuth } from "@/context/authcontext"; 
+import { useState, useEffect } from "react";
+import { useAuth } from "@/context/authcontext";
 import { useNavigate } from "react-router-dom";
-
+import io from "socket.io-client";
+import ChatSession from "./ChatSession";
+const socket = io('http://localhost:4500', { withCredentials: true });
 export default function V0PersonalChat() {
   const [newMessage, setNewMessage] = useState([]);
   const [showChatSession, setShowChatSession] = useState(false);
@@ -14,7 +14,9 @@ export default function V0PersonalChat() {
   const userData = useAuth();
   const name = userData.userData.username;
   const navigate = useNavigate();
-  const [username,setUsername] = useState('');
+  const userId = userData.userData.userId;
+  const username = userData.userData.username;
+  const [secondusername, setsecondusername] = useState('');
   useEffect(() => {
     const fetchMessages = async () => {
       try {
@@ -26,24 +28,39 @@ export default function V0PersonalChat() {
           credentials: 'include',
         });
         const data = await response.json();
-        //console.log(data[0]);
         setNewMessage(data);
       } catch (error) {
         console.error('Error fetching messages:', error);
       }
     };
-
     fetchMessages();
-  }, []); 
+  }, []);
 
+  useEffect(() => {
+    socket.emit('joinChat', userData.userData.userId);
+    socket.on('receiveMessage', (message) => {
+      setNewMessage((prevMessages) => [message, ...prevMessages]);
+    });
+    socket.on('updateSidebar', (message) => {
+      setNewMessage((prevMessages) => {
+        const updatedMessages = prevMessages.filter(
+          (msg) => msg.readBy.toString() !== message.readBy.toString() || msg.sendBy.toString() !== message.sendBy.toString()
+        );
+        return [message, ...updatedMessages];
+      });
+    });
+    return () => {
+      socket.off('receiveMessage');
+      socket.off('updateSidebar');
+    };
+  }, [userData.userData.userId]);
   const handleclick = async (message) => {
-    const recipientId = message.seconduser;
-    const username = message.username;
+    const recipientId = message.sendBy.toString()===userId?message.readBy.toString():message.sendBy.toString();
+    const second = message.sendBy.toString()===userId?msg.readerusername:msg.senderusername;
     setRecipientId(recipientId);
-    setUsername(username);
+    setsecondusername(second);
     setShowChatSession(true);
   }
-
   return (
     <div className="flex h-screen w-full max-w-[1200px] mx-auto">
       <div className="bg-background border-r border-muted w-[300px] flex flex-col">
@@ -74,16 +91,16 @@ export default function V0PersonalChat() {
         </div>
         <div className="flex-1 overflow-auto">
           <div className="p-4 space-y-4">
-            {newMessage  && newMessage.map((msg, index) => (
+            {newMessage && newMessage.map((msg, index) => (
               <div key={index} className="flex items-center gap-4" onClick={() => handleclick(msg)}>
                 <Avatar>
                   <AvatarImage src="/placeholder-user.jpg" />
                   <AvatarFallback>JD</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  <div className="font-medium">{msg.username}</div>
+                  <div className="font-medium">{msg.senderusername===username?msg.readerusername:msg.senderusername}</div>
                   <div className="text-xs text-muted-foreground">
-                    {msg.isSender ? "You" : msg.username} : {msg.message}
+                    {(msg.sendBy.toString()===userId) ? "You" : msg.senderusername} : {msg.content}
                   </div>
                 </div>
                 <div className="text-xs text-muted-foreground">{new Date(msg.timestamp).toLocaleString()}</div>
@@ -92,7 +109,7 @@ export default function V0PersonalChat() {
           </div>
         </div>
       </div>
-      {showChatSession && <ChatSession recipientId={recipientId} username = {username}/>}
+      {showChatSession && <ChatSession recipientId={recipientId} username={secondusername} />}
     </div>
   );
 }

@@ -1,16 +1,20 @@
-import React, { useEffect, useState } from "react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import React, { useEffect, useState, useRef } from "react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/authcontext";
-const ChatSession = ({recipientId,username}) => {
+import io from "socket.io-client";
+
+const socket = io('http://localhost:4500', { withCredentials: true });
+
+const ChatSession = ({ recipientId, username }) => {
     const [message, setMessage] = useState([]);
     const [currMess, setCurrMess] = useState('');
     const userData = useAuth();
     const userid = userData.userData.userId;
-    //console.log(userid);
-    //console.log(recipientId);
+    const chatEndRef = useRef(null);
+
     useEffect(() => {
         const fetchMessages = async () => {
             try {
@@ -22,7 +26,6 @@ const ChatSession = ({recipientId,username}) => {
                     credentials: 'include',
                 });
                 const data = await response.json();
-                //console.log(data);
                 setMessage(data);
             } catch (error) {
                 console.error('Error fetching messages:', error);
@@ -30,15 +33,31 @@ const ChatSession = ({recipientId,username}) => {
         };
 
         fetchMessages();
-    }, []); 
+
+        socket.emit('joinChat', { userId: userid});
+
+        socket.on('receiveMessage', (newMessage) => {
+            setMessage((prevMessages) => [...prevMessages, newMessage]);
+        });
+
+        return () => {
+            socket.off('receiveMessage');
+        };
+    }, [userid, recipientId]);
+
     const handleChange = (event) => {
         setCurrMess(event.target.value);
     };
 
     const handleSubmit = async () => {
-        if (currMess.trim() === '') return; 
-        //console.log(userid);
-        //console.log(recipientId);
+        if (currMess.trim() === '') return;
+
+        const newMessage = {
+            senderId: userid,
+            recipientId: recipientId,
+            content: currMess,
+        };
+
         try {
             await fetch('http://localhost:4500/api/personalchat/sendpersonal', {
                 method: 'POST',
@@ -46,17 +65,19 @@ const ChatSession = ({recipientId,username}) => {
                     'Content-Type': 'application/json',
                 },
                 credentials: 'include',
-                body: JSON.stringify({
-                    senderId: userid,
-                    recipientId: recipientId,
-                    message: currMess,
-                }),
+                body: JSON.stringify(newMessage),
             });
-            setCurrMess(''); 
+            setMessage((prevMessages) => [...prevMessages, newMessage]);
+            socket.emit('sendMessage', newMessage);
+            setCurrMess('');
         } catch (error) {
             console.error('Error sending message:', error);
         }
     };
+
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [message]);
 
     return (
         <div className="flex-1 flex flex-col">
@@ -87,13 +108,14 @@ const ChatSession = ({recipientId,username}) => {
             </div>
             <div className="flex-1 overflow-auto p-4 flex flex-col gap-4">
                 {message && message.map((msg, index) => (
-                    <div key={index} className={`flex items-end gap-2 ${msg.isSender? 'justify-end' : ''}`}>
-                        <div className={`px-4 py-2 rounded-lg max-w-[75%] text-sm ${msg.isSender ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                    <div key={index} className={`flex items-end gap-2 ${(msg.sendBy.toString()==userid) ? 'justify-end' : ''}`}>
+                        <div className={`px-4 py-2 rounded-lg max-w-[75%] text-sm ${(msg.sendBy.toString()==userid) ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
                             {msg.content}
                         </div>
                         <div className="text-xs text-muted-foreground">{new Date(msg.timestamp).toLocaleTimeString()}</div>
                     </div>
                 ))}
+                <div ref={chatEndRef} />
             </div>
             <div className="bg-background border-t border-muted p-4 flex items-center gap-2">
                 <Input 
